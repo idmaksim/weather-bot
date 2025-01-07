@@ -5,6 +5,7 @@ import "reflect-metadata";
 import { initMainRoutes } from "./modules/main/main.routes";
 import { initWeatherRoutes } from "./modules/weather/weather.routes";
 import logger from "./config/logger";
+import { run } from "@grammyjs/runner";
 
 const bootstrap = async () => {
   const bot = new Bot<MyContext>(config.BOT_TOKEN);
@@ -23,7 +24,7 @@ const bootstrap = async () => {
   initMainRoutes(bot);
   initWeatherRoutes(bot);
 
-  bot.start();
+  run(bot);
 };
 
 bootstrap();
