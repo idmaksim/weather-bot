@@ -5,6 +5,8 @@ import { MyContext } from "../../types/context";
 import { HttpService } from "../http/http.service";
 import config from "../../config/config";
 import { Location } from "../../types/location";
+import { format } from "util";
+import { BOT_MESSAGES } from "../../constants/messages.const";
 
 @Service()
 export class WeatherService {
@@ -12,7 +14,7 @@ export class WeatherService {
 
   private async getWeatherData(location: Location) {
     const url = formatWeatherUrl(location, config.OPENWEATHER_API_KEY);
-    return await this.httpService.get(url);
+    return this.httpService.get(url);
   }
 
   async handleLocation(ctx: MyContext) {
@@ -20,9 +22,11 @@ export class WeatherService {
       const location = ctx.message?.location;
       await this.ensureLocationExists(ctx, location);
       const weatherData = await this.getWeatherData(location as Location);
-      await ctx.reply(this.formatWeatherData(weatherData));
+      await ctx.reply(this.formatWeatherData(weatherData), {
+        parse_mode: "Markdown",
+      });
     } catch (error) {
-      await ctx.reply("Извините, не удалось получить информацию о погоде");
+      await ctx.reply(BOT_MESSAGES.WEATHER_ERROR);
     }
   }
 
@@ -34,18 +38,43 @@ export class WeatherService {
     }
   ) {
     if (!location) {
-      await ctx.reply("Пожалуйста, отправьте свою геопозицию");
+      await ctx.reply(BOT_MESSAGES.SEND_LOCATION, {
+        parse_mode: "Markdown",
+      });
       return;
     }
   }
 
-  private formatWeatherData(weatherData: any) {
-    return `
-    Погода в указанной локации:
-    🌡 Температура: ${Math.round(weatherData.main.temp)}°C
-    💨 Ветер: ${weatherData.wind.speed} м/с
-    💧 Влажность: ${weatherData.main.humidity}%
-    🌤 ${weatherData.weather[0].description}
-    `;
+  private formatWeatherData(data: any) {
+    const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString(
+      "ru-RU",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
+    const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString(
+      "ru-RU",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
+
+    return format(
+      BOT_MESSAGES.WEATHER_TEMPLATE,
+      data.name,
+      Math.round(data.main.temp),
+      Math.round(data.main.feels_like),
+      data.wind.speed,
+      data.wind.gust || data.wind.speed,
+      data.main.humidity,
+      (data.visibility / 1000).toFixed(1),
+      data.clouds.all,
+      data.weather[0].description.charAt(0).toUpperCase() +
+        data.weather[0].description.slice(1),
+      sunrise,
+      sunset
+    );
   }
 }
