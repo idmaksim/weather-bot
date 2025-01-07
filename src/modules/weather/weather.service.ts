@@ -14,7 +14,7 @@ import { MOSCOW_TIMEZONE } from "../../constants/timezone";
 export class WeatherService {
   constructor(private readonly httpService: HttpService) {}
 
-  private async getWeatherData(location: Location) {
+  async getWeatherData(location: Location) {
     const url = formatWeatherUrl(location, config.OPENWEATHER_API_KEY);
 
     logger.info("Запрос погоды", {
