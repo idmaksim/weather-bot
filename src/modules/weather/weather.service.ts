@@ -8,6 +8,7 @@ import { format } from "util";
 import { BOT_MESSAGES } from "../../constants/messages.const";
 import { WeatherResponse } from "../../types/weather-response";
 import logger from "../../config/logger";
+import { MOSCOW_TIMEZONE } from "../../constants/timezone";
 
 @Service()
 export class WeatherService {
@@ -68,13 +69,16 @@ export class WeatherService {
       {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: MOSCOW_TIMEZONE,
       }
     );
+
     const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString(
       "ru-RU",
       {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: MOSCOW_TIMEZONE,
       }
     );
 
