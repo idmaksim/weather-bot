@@ -1,4 +1,3 @@
-import axios from "axios";
 import { formatWeatherUrl } from "../../constants/owm-url.const";
 import { Service } from "typedi";
 import { MyContext } from "../../types/context";
@@ -7,6 +6,7 @@ import config from "../../config/config";
 import { Location } from "../../types/location";
 import { format } from "util";
 import { BOT_MESSAGES } from "../../constants/messages.const";
+import { WeatherResponse } from "../../types/weather-response";
 
 @Service()
 export class WeatherService {
@@ -45,7 +45,7 @@ export class WeatherService {
     }
   }
 
-  private formatWeatherData(data: any) {
+  private formatWeatherData(data: WeatherResponse) {
     const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString(
       "ru-RU",
       {
