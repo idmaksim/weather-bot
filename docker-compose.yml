@@ -7,9 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: weather-bot
     restart: unless-stopped
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    env_file:
+      - .env
     volumes:
       - ./logs:/app/logs
     networks:
