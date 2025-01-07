@@ -7,6 +7,7 @@ import { Location } from "../../types/location";
 import { format } from "util";
 import { BOT_MESSAGES } from "../../constants/messages.const";
 import { WeatherResponse } from "../../types/weather-response";
+import logger from "../../config/logger";
 
 @Service()
 export class WeatherService {
@@ -14,6 +15,12 @@ export class WeatherService {
 
   private async getWeatherData(location: Location) {
     const url = formatWeatherUrl(location, config.OPENWEATHER_API_KEY);
+
+    logger.info("Запрос погоды", {
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+
     return this.httpService.get(url);
   }
 
@@ -22,10 +29,20 @@ export class WeatherService {
       const location = ctx.message?.location;
       await this.ensureLocationExists(ctx, location);
       const weatherData = await this.getWeatherData(location as Location);
+
+      logger.info("Погода успешно получена", {
+        city: weatherData.name,
+        temperature: weatherData.main.temp,
+      });
+
       await ctx.reply(this.formatWeatherData(weatherData), {
         parse_mode: "Markdown",
       });
     } catch (error) {
+      logger.error("Ошибка при получении погоды", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       await ctx.reply(BOT_MESSAGES.WEATHER_ERROR);
     }
   }
